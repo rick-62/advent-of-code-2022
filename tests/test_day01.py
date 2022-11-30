@@ -11,7 +11,7 @@ Tests for `advent_of_code_2022` module.
 import pytest
 
 
-from advent_of_code_2022 import advent_of_code_2022
+from advent_of_code_2022 import day01
 
 
 @pytest.fixture
