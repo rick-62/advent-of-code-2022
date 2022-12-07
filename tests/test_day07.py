@@ -32,19 +32,89 @@ $ ls
 """
 
 
-def test_extract_dir_ls():
-    assert type(day07.extract_dir_ls(terminal_output)) == list
-    assert len(day07.extract_dir_ls(terminal_output)) == 4
-    assert day07.extract_dir_ls(terminal_output)[2] == '584 i\n'
-    assert day07.extract_dir_ls(terminal_output)[1] == 'dir e\n29116 f\n2557 g\n62596 h.lst\n'
+sample_terminal_output1 = \
+"""
+$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+"""
+
+sample_terminal_output2 = \
+"""
+$ cd /
+$ ls
+dir a
+$ cd a
+$ ls
+dir a
+2 a.txt
+$ cd a
+$ ls
+99999 a.txt
+"""
+
+def test_create_dir_store():
+
+    store, dirs = day07.create_dir_store(sample_terminal_output1) 
+    assert store == {'/': 23352670, '/-a': 94269}
+    assert dirs == set(['/', '/-a'])
+
+    store, dirs = day07.create_dir_store(terminal_output) 
+    assert store == {'/': 23352670, '/-a': 94269, '/-a-e': 584, '/-d': 24933642}
+    assert dirs == set(['/', '/-a', '/-a-e', '/-d'])
+
+    store, dirs = day07.create_dir_store(sample_terminal_output2)
+    assert store == {'/-a': 2, '/-a-a': 99999}
 
 
-def test_extract_filesizes():
-    assert day07.extract_filesizes(['dir e\n29116 f\n2557 g\n62596 h.lst\n']) == [94269]
-    assert day07.extract_filesizes(['dir e\n29116 f\n2557 g\n62596 h.lst\n', '45']) == [94269, 45]
-    assert set(day07.extract_filesizes(day07.extract_dir_ls(terminal_output))) == set([48381165, 94853, 584, 24933642])
+def test_tally_each_dir():
+    
+    assert day07.tally_each_dir(set(['/','/-a']), {'/': 23352670, '/-a': 94269}) == {
+        '/': 23352670 + 94269,
+        '/-a': 94269
+    }
+
+    assert day07.tally_each_dir(
+        set(['/', '/-a', '/-a-e', '/-d']), 
+        {'/': 23352670, '/-a': 94269, '/-a-e': 584, '/-d': 24933642}) == {
+            '/': 48381165,
+            '/-a': 94853 ,
+            '/-a-e': 584,
+            '/-d': 24933642
+        }
+ 
 
 
-def test_sum_filesizes_lt_100000():
-    assert day07.sum_fizesizes_lt_100000([123, 134555, 6]) == 129
+def test_sum_dirsizes_lt_100000():
+    assert day07.sum_dirsizes_lt_100000({'/': 23352670 + 94269, 'a': 94269}) == 94269
+    assert day07.sum_dirsizes_lt_100000({
+        '/': 23352670 + 94269 + 24933642 + 584,
+        'a': 94269 + 584,
+        'e': 584,
+        'd': 24933642
+    }) == 95437
+    
 
+def test_calc_space_required():
+    assert day07.calc_space_required(48381165) == 8381165
+
+
+
+def test_size_of_smallest_dir_to_remove():
+    assert day07.size_of_smallest_dir_to_remove(
+        {
+            '/': 48381165,
+            '/-a': 94853 ,
+            '/-a-e': 584,
+            '/-d': 24933642
+        }
+    ) == 24933642
