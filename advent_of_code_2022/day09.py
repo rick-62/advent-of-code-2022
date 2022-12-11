@@ -1,14 +1,89 @@
 
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 
 from helper import load_input
 
 
+UDLR = {'U': 1j, 'D': -1j, 'L': -1, 'R': 1}
+
+
 def create_input():
     return load_input(9).read().splitlines()
+
+
+def in_proximity(diff: complex) -> bool:
+    '''
+    given the complex difference between two coordinates,
+    returns bool if coordinates are adjacent or not
+    '''
+    return True if (abs(diff.real) <= 1 and abs(diff.imag) <= 1) else False
+
+
+def complex_sign(complex_number: complex) -> complex:
+    '''
+    given  a complex number, 
+    removes magnitude from both real and imaginary parts
+    '''
+    i, j = complex_number.real, complex_number.imag
+    return np.sign(i) + np.sign(j) * 1j
+
+
+def finish_moving_tail(direction: str, tail: complex, head: complex):
+
+    i_tail, j_tail = int(tail.real), int(tail.imag)
+    i_head, j_head = int(head.real), int(head.imag)
+
+    if direction == 'U':
+        return [i_tail + j * 1j for j in range(j_tail + 1, j_head)]
+
+    if direction == 'D':
+        return [i_tail + j * 1j for j in reversed(range(j_headi_head + 1, j_tail))]
+
+    if direction == 'L':
+        return [i + j_tail for i in reversed(range(i_head + 1, i_tail))]
+
+    if direction == 'R':
+        return [i + j_tail for i in range(i_tail + 1, i_head)]
+
+
+
+def process_movements(movements: List[str]) -> List[complex]:
+    visited = [0]
+    head = 0
+    tail = 0
+
+    for movement in movements:
+
+        direction, distance = movement.split()
+        head += UDLR[direction] * int(distance)
+        diff = head - tail
+
+        if in_proximity(diff):
+            continue  # stop
+
+        # check if tail needs to move diagonally
+        if diff.real != 0 and diff.imag != 0:
+            tail += complex_sign(diff)
+            visited.append(tail)
+        
+        if in_proximity(diff):
+            continue  # stop
+
+
+
+        
+
+
+        
+    return visited
+    
+
+
+def count_distinct(visited: List[complex]) -> int:
+    return len(set(visited))
 
 
 @dataclass
@@ -28,7 +103,6 @@ class Tail:
         else: 
             return False
 
-
     @classmethod
     def move(cls, target):
         # check if in proximity - do nothing if they are
@@ -41,7 +115,13 @@ class Tail:
             cls.curr_loc += np.sign((i, j))
             cls.visited.append(cls.curr_loc)
 
+        # Recheck whether in proximity
+        if cls.in_proximity(cls.curr_loc, target):
+            return cls.curr_loc
+
         # keep moving T until H reached, updating visited and current coord (maybe batch)
+        
+
         
 
         return cls.curr_loc
@@ -71,25 +151,11 @@ class Head:
 
 
 
-    
-
-    
-
-
-
-# def move_tail_coords(h_coord: Tuple[int], t_coord: Tuple[int]) -> (Tuple[int], set[Tuple[int]]):
-#     '''
-#     Given the new Head coords, move Tail coords accordingly.
-#     Returns set of visited coordinates & final position of Tail.
-#     '''
-#     pass
-
-# given both coordinates, return list of coordinates Tail has followed
-# for instruction, move H -> update coord, update Tail coords
-    # add to set all T coordss
-# finally count the length of the set to get puzzle answer
-
 
 if __name__ == '__main__':
 
-    pass
+    movements = create_input()
+
+    visited = process_movements(movements)
+
+    print(count_distinct(visited))

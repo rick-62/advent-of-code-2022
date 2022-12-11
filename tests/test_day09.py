@@ -8,53 +8,46 @@ def test_create_input():
     assert len(day09.create_input()) > 5
 
 
-def test_Head():
-    
-    day09.Head.move('R', 4)
-    assert list(day09.Head.curr_loc) == [4,0]
-
-    day09.Head.move('U', 4)
-    assert list(day09.Head.curr_loc) == [4,4]
-
-    day09.Head.move('L', 3)
-    assert list(day09.Head.curr_loc) == [1,4]
-
-    day09.Head.move('D', 1)
-    assert list(day09.Head.curr_loc) == [1,3]
-
-    day09.Head.move('R', 4)
-    day09.Head.move('D', 1)
-    day09.Head.move('L', 5)
-    day09.Head.move('R', 2)
-    assert list(day09.Head.curr_loc) == [2,2]
 
 
-def test_Tail():
+def test_process_movements():
 
-    assert list(day09.Tail.move((1, 1))) == [0, 0]
-    assert list(day09.Tail.move((1, 2))) == [1, 1]
-    assert list(day09.Tail.move((1, 3))) == [1, 2]
-
-
-    # Test count of visited
-    day09.Tail.visited = []
-    assert day09.Tail.count_visited() == 0
-    day09.Tail.visited = [(0, 0),(1, 0),(0, 5),(2, 0),(0, 0),]
-    assert day09.Tail.count_visited() == 4
+    day09.process_movements(['R 4'])
 
 
 def test_in_proximity_method():
 
-    # positive coords
-    assert day09.Tail.in_proximity(np.array((0, 0)), np.array((1, 3))) == False
-    assert day09.Tail.in_proximity(np.array((1, 1)), np.array((1, 3))) == False
-    assert day09.Tail.in_proximity(np.array((1, 4)), np.array((1, 3))) == True
-    assert day09.Tail.in_proximity(np.array((2, 4)), np.array((1, 3))) == True
+    # TRUE outcomes
+    assert day09.in_proximity(0+0j) == True
+    assert day09.in_proximity(1+0j) == True
+    assert day09.in_proximity(0+1j) == True
+    assert day09.in_proximity(-1+0j) == True
+    assert day09.in_proximity(1+1j) == True
+    assert day09.in_proximity(-1-1j) == True
 
-    # negative coords
-    assert day09.Tail.in_proximity(np.array((2, 4)), np.array((-1, -3))) == False
-    assert day09.Tail.in_proximity(np.array((-2, -4)), np.array((-1, -3))) == True
-    assert day09.Tail.in_proximity(np.array((0, -3)), np.array((-1, -3))) == True
+    # FALSE outcomes
+    assert day09.in_proximity(-1-5j) == False
+    assert day09.in_proximity(-5-5j) == False
+    assert day09.in_proximity(1+2j) == False
+    assert day09.in_proximity(2-1j) == False
+    assert day09.in_proximity(0-5j) == False
+    assert day09.in_proximity(0+2j) == False
+
+
+def test_complex_sign():
+
+    assert day09.complex_sign(6+4j) == 1+1j
+    assert day09.complex_sign(-5+4j) == -1+1j
+    assert day09.complex_sign(-6+-4j) == -1-1j
+    assert day09.complex_sign(-6+0j) == -1+0j
+    assert day09.complex_sign(6+-4j) == 1-1j
+
+
+def test_finish_moving_tail():
+
+    assert day09.finish_moving_tail('R', tail=0+0j, head=2+0j) == [1+0j]
+
+
 
 
 
