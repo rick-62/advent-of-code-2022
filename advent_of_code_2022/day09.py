@@ -40,7 +40,7 @@ def finish_moving_tail(direction: str, tail: complex, head: complex):
         return [i_tail + j * 1j for j in range(j_tail + 1, j_head)]
 
     if direction == 'D':
-        return [i_tail + j * 1j for j in reversed(range(j_headi_head + 1, j_tail))]
+        return [i_tail + j * 1j for j in reversed(range(j_head + 1, j_tail))]
 
     if direction == 'L':
         return [i + j_tail for i in reversed(range(i_head + 1, i_tail))]
@@ -50,10 +50,8 @@ def finish_moving_tail(direction: str, tail: complex, head: complex):
 
 
 
-def process_movements(movements: List[str]) -> List[complex]:
+def process_movements(movements: List[str], head=0, tail=0) -> List[complex]:
     visited = [0]
-    head = 0
-    tail = 0
 
     for movement in movements:
 
@@ -72,14 +70,11 @@ def process_movements(movements: List[str]) -> List[complex]:
         if in_proximity(diff):
             continue  # stop
 
-
-
-        
-
-
-        
-    return visited
+        visited.extend(finish_moving_tail(direction, tail, head))
+        tail = visited[-1]
     
+    return visited
+
 
 
 def count_distinct(visited: List[complex]) -> int:
