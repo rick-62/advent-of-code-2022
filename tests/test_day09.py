@@ -67,6 +67,7 @@ def test_finish_moving_tail():
     assert day09.finish_moving_tail('D', tail=0+0j, head=0-5j) == [-1j, -2j, -3j, -4j]
     assert day09.finish_moving_tail('L', tail=0+0j, head=-5+0j) == [-1, -2, -3, -4]
     assert day09.finish_moving_tail('U', tail=2-2j, head=2+0j) == [2-1j]
+    assert day09.finish_moving_tail('L', tail=3+4j, head=1+4j) == [2+4j]
 
 
 
