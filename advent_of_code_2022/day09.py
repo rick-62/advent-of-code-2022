@@ -1,5 +1,6 @@
 
-from dataclasses import dataclass
+from collections import defaultdict
+from functools import lru_cache
 from typing import Tuple, List
 
 import numpy as np
@@ -14,6 +15,7 @@ def create_input():
     return load_input(9).read().splitlines()
 
 
+@lru_cache
 def in_proximity(diff: complex) -> bool:
     '''
     given the complex difference between two coordinates,
@@ -22,6 +24,7 @@ def in_proximity(diff: complex) -> bool:
     return True if (abs(diff.real) <= 1 and abs(diff.imag) <= 1) else False
 
 
+@lru_cache
 def complex_sign(complex_number: complex) -> complex:
     '''
     given  a complex number, 
@@ -31,74 +34,70 @@ def complex_sign(complex_number: complex) -> complex:
     return np.sign(i) + np.sign(j) * 1j
 
 
-def finish_moving_tail(direction: str, tail: complex, head: complex):
+@lru_cache
+def finish_moving_tail(tail: complex, head: complex):
 
     i_tail, j_tail = int(tail.real), int(tail.imag)
     i_head, j_head = int(head.real), int(head.imag)
 
-    if direction == 'U':
+    if j_head > j_tail:
         return [i_tail + j * 1j for j in range(j_tail + 1, j_head)]
 
-    if direction == 'D':
+    if j_head < j_tail:
         return [i_tail + j * 1j for j in reversed(range(j_head + 1, j_tail))]
 
-    if direction == 'L':
+    if i_head < i_tail:
         return [i + j_tail * 1j for i in reversed(range(i_head + 1, i_tail))]
 
-    if direction == 'R':
+    if i_head > i_tail:
         return [i + j_tail * 1j for i in range(i_tail + 1, i_head)]
 
 
-def process_movement(movements: List[str], head=0, tail=0) -> List[complex]:
-    visited = [0]
+@lru_cache
+def process_movement(head: complex = 0, tail: complex = 0) -> List[complex]:
+    visited = []
 
-    for movement in movements:
+    diff = head - tail
 
-        direction, distance = movement.split()
-        head += UDLR[direction] * int(distance)
+    if in_proximity(diff):
+        return visited
+
+    # check if tail needs to move diagonally
+    while diff.real != 0 and diff.imag != 0:
+        tail += complex_sign(diff)
+        visited.append(tail)
         diff = head - tail
 
         if in_proximity(diff):
-            continue  # stop
-
-        # check if tail needs to move diagonally
-        if diff.real != 0 and diff.imag != 0:
-            tail += complex_sign(diff)
-            visited.append(tail)
-        
-        if in_proximity(diff):
-            continue  # stop
-
-        visited.extend(finish_moving_tail(direction, tail, head))
-        tail = visited[-1]
+            return visited
+    
+    visited.extend(finish_moving_tail(tail, head))
     
     return visited
 
 
-def process_movements(movements: List[str], head=0, tail=0) -> List[complex]:
+
+def process_movements(movements: List[str], n_tails: int = 9):
     visited = [0]
+    knots = defaultdict(complex)
 
     for movement in movements:
+        print(movement, knots)
 
         direction, distance = movement.split()
-        head += UDLR[direction] * int(distance)
-        diff = head - tail
+        knots[0] += UDLR[direction] * int(distance)
 
-        if in_proximity(diff):
-            continue  # stop
+        for n in range(1, n_tails + 1):
+            head = knots[n-1]
+            tail = knots[n]
+            
+            _visited = process_movement(head=head, tail=tail)
+            knots[n] = _visited[-1] if _visited else knots[n]
 
-        # check if tail needs to move diagonally
-        if diff.real != 0 and diff.imag != 0:
-            tail += complex_sign(diff)
-            visited.append(tail)
-        
-        if in_proximity(diff):
-            continue  # stop
+        visited.extend(_visited)
 
-        visited.extend(finish_moving_tail(direction, tail, head))
-        tail = visited[-1]
-    
-    return visited
+    return visited         
+
 
 
 def count_distinct(visited: List[complex]) -> int:
@@ -111,6 +110,10 @@ if __name__ == '__main__':
 
     movements = create_input()
 
-    visited = process_movements(movements)
+    visited = process_movements(movements, n_tails=1)
+
+    print(count_distinct(visited))
+
+    visited = process_movements(movements, n_tails=9)
 
     print(count_distinct(visited))
