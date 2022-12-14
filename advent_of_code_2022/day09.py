@@ -15,6 +15,16 @@ def create_input():
     return load_input(9).read().splitlines()
 
 
+def get_head_coord(movements):
+    '''Convert head movements into indivudal coordinates'''
+    head = 0
+    for step in movements:
+        direction, distance = step.split()
+        for _ in range(int(distance)):
+            head += UDLR[direction]
+            yield head
+
+
 @lru_cache
 def in_proximity(diff: complex) -> bool:
     '''
@@ -36,6 +46,7 @@ def complex_sign(complex_number: complex) -> complex:
 
 @lru_cache
 def finish_moving_tail(tail: complex, head: complex):
+    '''Mostly obsolete - returns UDLR coordinates'''
 
     i_tail, j_tail = int(tail.real), int(tail.imag)
     i_head, j_head = int(head.real), int(head.imag)
@@ -55,6 +66,10 @@ def finish_moving_tail(tail: complex, head: complex):
 
 @lru_cache
 def process_movement(head: complex = 0, tail: complex = 0) -> List[complex]:
+    '''
+    Moves tail according to rules, until within proximity of head.
+    Returns list of tail visited coordinates.
+    '''
     visited = []
 
     diff = head - tail
@@ -76,16 +91,18 @@ def process_movement(head: complex = 0, tail: complex = 0) -> List[complex]:
     return visited
 
 
-
 def process_movements(movements: List[str], n_tails: int = 9):
+    '''
+    Returns list of all visited coordinates tail has visited,
+    given a list of the head movements (puzzle input)
+    '''
+
     visited = [0]
     knots = defaultdict(complex)
 
-    for movement in movements:
-        print(movement, knots)
+    for step in get_head_coord(movements):
 
-        direction, distance = movement.split()
-        knots[0] += UDLR[direction] * int(distance)
+        knots[0] = step
 
         for n in range(1, n_tails + 1):
             head = knots[n-1]
@@ -99,21 +116,18 @@ def process_movements(movements: List[str], n_tails: int = 9):
     return visited         
 
 
-
 def count_distinct(visited: List[complex]) -> int:
     return len(set(visited))
-
-
 
 
 if __name__ == '__main__':
 
     movements = create_input()
 
+    # Part 1
     visited = process_movements(movements, n_tails=1)
-
     print(count_distinct(visited))
 
+    # Part 2
     visited = process_movements(movements, n_tails=9)
-
     print(count_distinct(visited))

@@ -29,7 +29,16 @@ test_input2 = [
 ]
 
 
+def test_get_head_coords():
 
+    assert list(day09.get_head_coord(['R 4'])) == [1, 2, 3, 4]
+    assert list(day09.get_head_coord(['R 4', 'U 4'])) == [1, 2, 3, 4, 4+1j, 4+2j, 4+3j, 4+4j]
+    assert list(day09.get_head_coord(['R 4', 'U 4', 'L 3', 'D 1'])) == [
+        1, 2, 3, 4,                 # R 4
+        4+1j, 4+2j, 4+3j, 4+4j,     # U 4
+        3+4j, 2+4j, 1+4j,           # L 3
+        1+3j,                       # D 1
+    ]
 
 
 def test_process_movements():
